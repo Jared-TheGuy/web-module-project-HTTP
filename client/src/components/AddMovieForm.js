@@ -1,56 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import React from "react";
+import { useState } from "react";
 import { Link } from 'react-router-dom';
+import axios from "axios";
+import { useHistory } from 'react-router-dom';
 
-import axios from 'axios';
+const AddMovieForm = (props) => {
+    const [movie, setMovie] = useState({
+        title:"",
+        director: "",
+        genre: "",
+        metascore: 0,
+        description: "",
+        id: Date.time
+    });
+    const { push } = useHistory();
 
-const EditMovieForm = (props) => {
-	const { push } = useHistory();
-
-	const {id} = useParams();
-
-	const [movie, setMovie] = useState({
-		title:"",
-		director: "",
-		genre: "",
-		metascore: 0,
-		description: ""
-	});
-
-	useEffect(() => {
-		axios.get(`http://localhost:5000/api/movies/${id}`)
-		.then(resp => {
-			setMovie(resp.data)
-		})
-		.then(err => {
-			console.log(err)
-		})
-	}, [])
-	
-	const handleChange = (e) => {
+    const handleChange = (e) => {
         setMovie({
             ...movie,
             [e.target.name]: e.target.value
         });
     }
 
-    const handleSubmit = (e) => {
-		e.preventDefault();
+    const handleSubmit = (event) => {
+        event.preventDefault();
 
-		axios.put(`http://localhost:5000/api/movies/${id}`, movie)
-		.then(resp => {
-			props.setMovies(resp.data)
-			push(`/movies/${id}`)
-		})
-		.catch(err => {
-			console.log(err)
-		})
-	}
-	
-	const { title, director, genre, metascore, description } = movie;
+        axios.post(`http://localhost:5000/api/movies`, movie)
+            .then(resp => {
+                props.setMovies(resp.data);
+                setMovie ({
+                title:"",
+                director: "",
+                genre: "",
+                metascore: 0,
+                description: "",
+                id: Date.time
+            })
+        
+            push("/movies")
+        })
+        .catch(err => {
+            console.log(err)
+        })
+    }
+
+    const { title, director, genre, metascore, description } = movie;
 
     return (
-	<div className="col">
+        <div className="col">
 		<div className="modal-content">
 			<form onSubmit={handleSubmit}>
 				<div className="modal-header">						
@@ -88,4 +85,4 @@ const EditMovieForm = (props) => {
 	</div>);
 }
 
-export default EditMovieForm;
+export default AddMovieForm;
